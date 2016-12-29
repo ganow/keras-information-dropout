@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import h5py
 from PIL import Image
@@ -13,6 +14,9 @@ CANVAS_SIZE = (
 
 inpath = 'data/cluttered_mnist.h5'
 filepath = 'images/datasample.png'
+
+if not os.path.isdir('images'):
+  os.mkdir(images)
 
 with h5py.File(inpath, 'r') as hf:
 
