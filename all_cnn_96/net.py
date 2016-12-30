@@ -102,7 +102,8 @@ def load_model(json_path, weight_path=None):
   with open(json_path, 'r') as f:
     model = model_from_json(f.readline(),
                             custom_objects={'Convolution2DwithOwnRegularizer': Convolution2D,
-                                            'KLRegularizer': KLRegularizer})
+                                            'KLRegularizer': KLRegularizer,
+                                            'softmax': softmax})
   if weight_path:
     model.load_weights(weight_path)
   return model
