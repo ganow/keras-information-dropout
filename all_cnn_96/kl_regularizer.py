@@ -12,7 +12,7 @@ class KLRegularizer(Regularizer):
 
   def __call__(self, x):
     regularization = 0
-    regularization += - K.sum(self.beta * x, axis=-1)
+    regularization += - self.beta * K.mean(K.sum(x, keepdims=0))
     return regularization
 
   def get_config(self):
