@@ -25,14 +25,17 @@ class InformationDropout(Layer):
     #                                  name='{}_gamma'.format(self.name))
     pass
 
-  def call(self, x, mask=None):
+  def call(self, inputs, mask=None):
     ## TODO: このフェーズで入力されるxをどのように変換するかについてを記述する
     # if 0. < self.p < 1.:
     #     noise_shape = self._get_noise_shape(x)
     #     x = K.in_train_phase(K.dropout(x, self.p, noise_shape), x)
     # return x
-
-    return x
+    x, logalpha = inputs
+    noise_x = x * K.random_normal(shape=K.shape(x), mean=0.0,
+                                  std=K.exp(logalpha))
+    # return K.in_train_phase(noise_x, x)
+    return noise_x
 
   def get_config(self):
     ## TODO: このフェーズでパラメーターを辞書として登録する？
