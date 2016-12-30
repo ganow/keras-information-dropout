@@ -20,6 +20,13 @@ nb_epoch = 50
 beta = 1.0
 lr = 0.0001
 
+print('... Define network')
+
+x = Input(batch_shape=(batch_size, original_dim), name='input')
+h = Dense(intermediate_dim, activation='relu', name='h')(x)
+z = Dense(latent_dim, activation='relu', name='z')(h)
+z_logalpha = Dense(latent_dim, name='z_logalpha')(h)
+
 def sampling(args):
   z, z_logalpha = args
 
@@ -27,28 +34,21 @@ def sampling(args):
                                   std=K.exp(z_logalpha)))
   return z * epsilon
 
+# note that "output_shape" isn't necessary with the TensorFlow backend
+noise_z = Lambda(sampling, output_shape=lambda input_shapes: input_shapes[0], name='noise_z')([z, z_logalpha])
+
+# we instantiate these layers separately so as to reuse them later
+decoder_h = Dense(intermediate_dim, activation='relu', name='decoder_h')
+decoder_mean = Dense(original_dim, activation='sigmoid', name='decoder_x')
+h_decoded = decoder_h(noise_z)
+x_decoded_mean = decoder_mean(h_decoded)
+
 def vae_loss(x, x_decoded_mean):
   xent_loss = original_dim * objectives.binary_crossentropy(x, x_decoded_mean)
   kl_loss = - K.mean(z_logalpha)
   return xent_loss + beta * kl_loss
 
 if __name__ == '__main__':
-
-  print('... Define network')
-
-  x = Input(batch_shape=(batch_size, original_dim), name='input')
-  h = Dense(intermediate_dim, activation='relu', name='h')(x)
-  z = Dense(latent_dim, activation='relu', name='z')(h)
-  z_logalpha = Dense(latent_dim, name='z_logalpha')(h)
-
-  # note that "output_shape" isn't necessary with the TensorFlow backend
-  noise_z = Lambda(sampling, output_shape=lambda input_shapes: input_shapes[0], name='noise_z')([z, z_logalpha])
-
-  # we instantiate these layers separately so as to reuse them later
-  decoder_h = Dense(intermediate_dim, activation='relu', name='decoder_h')
-  decoder_mean = Dense(original_dim, activation='sigmoid', name='decoder_x')
-  h_decoded = decoder_h(noise_z)
-  x_decoded_mean = decoder_mean(h_decoded)
 
   vae = Model(x, x_decoded_mean)
 
