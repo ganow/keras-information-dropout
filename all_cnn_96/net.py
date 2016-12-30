@@ -109,9 +109,9 @@ def load_model(json_path, weight_path=None):
 
 if __name__ == '__main__':
   # model = get_model(IMG_SIZE_DEFAULT, BETA_DEFAULT, KERNEL_SIZE_DEFAULT, NB_FILTERS_DEFAULT)
-  model = load_model('data/all_cnn_96.json')
+  model = load_model('models/all_cnn_96.json')
   print(model.summary())
 
   import json
-  with open('data/all_cnn_96.json', 'w') as f:
+  with open('models/all_cnn_96.json', 'w') as f:
     json.dump(json.loads(model.to_json()), f)
