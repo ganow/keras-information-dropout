@@ -47,6 +47,8 @@ p.add_argument('--name', type=str, default=None,
                help='experiment name (default: None)')
 p.add_argument('--rootdir', type=str, default='./',
                help='root directory for saving results (default: ./)')
+p.add_argument('--pasta-ip', type=str, default=None,
+               help='ip address for pastalog (default: None)')
 
 if __name__ == '__main__':
   args = p.parse_args()
@@ -76,12 +78,21 @@ if __name__ == '__main__':
   model.compile(optimizer=Adam(lr=args.lr), loss='categorical_crossentropy',
                 metrics=['accuracy'])
 
+  callbacks = []
   model_checkpoint = ModelCheckpoint((dirs.checkpointsdir / 'weights_{epoch:03d}_{val_accuracy:.2f}.h5').as_posix(),
                                      monitor='val_acc', verbose=0,
                                      save_best_only=False, save_weights_only=True,
                                      mode='auto')
+  callbacks.append(model_checkpoint)
 
   csv_logger = CSVLogger((dirs.historydir / 'log.tsv').as_posix(), separator='\t', append=False)
+  callbacks.append(csv_logger)
+
+  if args.pasta_ip:
+    from pastalog_monitor import PastalogMonitor
+    name = args.name if args.name else 'all-cnn-96'
+    pastalog_monitor = PastalogMonitor(name=name, root=args.pasta_ip)
+    callbacks.append(pastalog_monitor)
 
   print('... Load data')
   (X_train, Y_train), (X_test, Y_test) = load_data(datapath=args.datapath, img_size=args.img_size)
@@ -89,4 +100,4 @@ if __name__ == '__main__':
   print('... Start training')
   model.fit(X_train, Y_train,
             shuffle=True, batch_size=args.batch_size, nb_epoch=args.nb_epoch,
-            validation_data=(X_test, Y_test), callbacks=[model_checkpoint, csv_logger])
+            validation_data=(X_test, Y_test), callbacks=callbacks)
