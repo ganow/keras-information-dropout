@@ -6,6 +6,8 @@ import numpy as np
 from keras.models import Model
 from keras.layers import Input, Dense, Dropout, Activation, Flatten, Lambda
 from keras.layers import BatchNormalization
+from keras.layers.pooling import GlobalAveragePooling2D
+from keras.activations import softmax
 from keras import backend as K
 
 from kl_regularizer import KLRegularizer
@@ -47,16 +49,12 @@ def information_dropout_block(input_tensor, kernel_size, nb_filter, beta, block)
 
     epsilon = K.exp(K.random_normal(shape=K.shape(f_x), mean=0.,
                                     std=K.exp(logalpha)))
-    return f_x * epsilon
+    return K.in_train_phase(f_x * epsilon, f_x)
 
   noise_x = Lambda(sampling, output_shape=lambda input_shapes: input_shapes[0],
                    name='block{}-z'.format(block))([f_x, logalpha])
 
-  # noise_x = f_x * K.exp(K.random_normal(shape=K.shape(f_x), mean=0.0,
-  #                                       std=K.exp(logalpha)))
-
   return noise_x
-  # return K.in_train_phase(noise_x, f_x)
 
 def get_model(img_size, beta, kernel_size, nb_filters):
 
@@ -92,8 +90,9 @@ def get_model(img_size, beta, kernel_size, nb_filters):
   x = BatchNormalization(axis=bn_axis, name='block4-bn2')(x)
   x = Activation('relu', name='block4-relu2')(x)
 
-  x = Flatten(name='flatten')(x)
-  x = Dense(10, activation='softmax', name='softmax')(x)
+  x = GlobalAveragePooling2D(name='spatial-average')(x)
+  x = Lambda(lambda x: softmax(x), name='softmax')(x)
+
   model = Model(input_tensor, x, name='All-CNN-96')
   return model
 
@@ -108,8 +107,8 @@ def load_model(json_path, weight_path=None):
   return model
 
 if __name__ == '__main__':
-  # model = get_model(IMG_SIZE_DEFAULT, BETA_DEFAULT, KERNEL_SIZE_DEFAULT, NB_FILTERS_DEFAULT)
-  model = load_model('models/all_cnn_96.json')
+  model = get_model(IMG_SIZE_DEFAULT, BETA_DEFAULT, KERNEL_SIZE_DEFAULT, NB_FILTERS_DEFAULT)
+  # model = load_model('models/all_cnn_96.json')
   print(model.summary())
 
   import json
