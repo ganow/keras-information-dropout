@@ -45,7 +45,7 @@ x_decoded_mean = decoder_mean(h_decoded)
 
 def vae_loss(x, x_decoded_mean):
   xent_loss = original_dim * objectives.binary_crossentropy(x, x_decoded_mean)
-  kl_loss = - K.mean(z_logalpha)
+  kl_loss = - K.mean(K.sum(z_logalpha, axis=-1))
   return xent_loss + beta * kl_loss
 
 if __name__ == '__main__':
