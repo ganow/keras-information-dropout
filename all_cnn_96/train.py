@@ -77,7 +77,7 @@ if __name__ == '__main__':
                 metrics=['accuracy'])
 
   model_checkpoint = ModelCheckpoint((dirs.checkpointsdir / 'weights_{epoch:03d}_{val_accuracy:.2f}.h5').as_posix(),
-                                     monitor='val_accuracy', verbose=0,
+                                     monitor='val_acc', verbose=0,
                                      save_best_only=False, save_weights_only=True,
                                      mode='auto')
 
