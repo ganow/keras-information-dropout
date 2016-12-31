@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
   print('... Prepare callbacks')
   callbacks = []
-  model_checkpoint = ModelCheckpoint((dirs.checkpointsdir / 'weights_{epoch:03d}_{val_acc:.2f}.h5').as_posix(),
+  model_checkpoint = ModelCheckpoint((dirs.checkpointsdir / 'weights_{epoch:03d}_{val_acc:.4f}.h5').as_posix(),
                                      monitor='val_acc', verbose=0,
                                      save_best_only=False, save_weights_only=True,
                                      mode='auto')
