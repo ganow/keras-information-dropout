@@ -4,7 +4,7 @@
 from argparse import ArgumentParser
 
 from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint, CSVLogger
+from keras.callbacks import ModelCheckpoint, CSVLogger, LearningRateScheduler
 
 from net import IMG_SIZE_DEFAULT, BETA_DEFAULT, KERNEL_SIZE_DEFAULT, NB_FILTERS_DEFAULT
 from utils import prepare_dirs, load_data
@@ -78,6 +78,7 @@ if __name__ == '__main__':
   model.compile(optimizer=Adam(lr=args.lr), loss='categorical_crossentropy',
                 metrics=['accuracy'])
 
+  print('... Prepare callbacks')
   callbacks = []
   model_checkpoint = ModelCheckpoint((dirs.checkpointsdir / 'weights_{epoch:03d}_{val_acc:.2f}.h5').as_posix(),
                                      monitor='val_acc', verbose=0,
@@ -87,6 +88,20 @@ if __name__ == '__main__':
 
   csv_logger = CSVLogger((dirs.historydir / 'log.tsv').as_posix(), separator='\t', append=False)
   callbacks.append(csv_logger)
+
+  def schedule(epoch):
+    if epoch == 30:
+      new_lr = args.lr * 0.1
+      print('... Learning rate: {}'.format(new_lr))
+      return new_lr
+    elif epoch == 60:
+      new_lr = args.lr * 0.1 * 0.1
+      print('... Learning rate: {}'.format(new_lr))
+      return new_lr
+    else:
+      return args.lr
+  lr_scheduler = LearningRateScheduler(schedule)
+  callbacks.append(lr_scheduler)
 
   if args.pasta_ip:
     from pastalog_monitor import PastalogMonitor
