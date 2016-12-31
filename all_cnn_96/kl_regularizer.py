@@ -13,9 +13,8 @@ class KLRegularizer(Regularizer):
     self.beta = K.cast_to_floatx(beta)
 
   def __call__(self, logalpha):
-    clipped = K.clip(logalpha, np.log(0), np.log(0.5))
     regularization = 0
-    regularization += - self.beta * K.mean(K.sum(clipped, keepdims=0))
+    regularization += - self.beta * K.mean(K.sum(logalpha, keepdims=0))
     return regularization
 
   def get_config(self):
