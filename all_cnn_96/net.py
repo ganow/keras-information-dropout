@@ -50,7 +50,8 @@ def information_dropout_block(input_tensor, kernel_size, nb_filter, beta, block)
 
     epsilon = K.exp(K.random_normal(shape=K.shape(f_x), mean=0.,
                                     std=K.exp(logalpha)))
-    return K.in_train_phase(f_x * epsilon, f_x)
+    # return K.in_train_phase(f_x * epsilon, f_x)
+    return f_x * epsilon
 
   noise_x = Lambda(sampling, output_shape=lambda input_shapes: input_shapes[0],
                    name='block{}-z'.format(block))([f_x, logalpha])
