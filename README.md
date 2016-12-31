@@ -13,7 +13,7 @@ keras-information-dropout
 
 <img src="all_cnn_96/images/datasample.png" width="300px">
 
-<img src="all_cnn_96/images/kldiv_heatmap.pdf" width="400px">
+<img src="all_cnn_96/images/kldiv_heatmap.png" width="400px">
 
 ## Usage
 
