@@ -42,15 +42,16 @@ def information_dropout_block(input_tensor, kernel_size, nb_filter, beta, block)
   logalpha = Convolution2D(nb_filter, kernel_size[0], kernel_size[1],
                            activity_regularizer=KLRegularizer(beta=beta),
                            border_mode='same', subsample=(2, 2),
+                           clip_val=(np.log(0.0), np.log(0.5)), # clip 0 < alpha < 0.5 for stabilize learning
                            name='block{}-logalpha'.format(block))(x)
 
   def sampling(args):
     f_x, logalpha = args
 
-    # clip 0 < alpha < 0.5 for stabilize learning
     epsilon = K.exp(K.random_normal(shape=K.shape(f_x), mean=0.,
-                                    std=K.clip(K.exp(logalpha), 0, 0.5)))
-    return K.in_train_phase(f_x * epsilon, f_x)
+                                    std=K.exp(logalpha)))
+    # return K.in_train_phase(f_x * epsilon, f_x)
+    return f_x * epsilon
 
   noise_x = Lambda(sampling, output_shape=lambda input_shapes: input_shapes[0],
                    name='block{}-z'.format(block))([f_x, logalpha])

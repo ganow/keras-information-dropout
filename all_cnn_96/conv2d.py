@@ -15,7 +15,7 @@ class Convolution2DwithOwnRegularizer(Layer):
                border_mode='valid', subsample=(1, 1), dim_ordering='default',
                W_regularizer=None, b_regularizer=None, activity_regularizer=None,
                W_constraint=None, b_constraint=None,
-               bias=True, **kwargs):
+               bias=True, clip_val=None, **kwargs):
     if dim_ordering == 'default':
       dim_ordering = K.image_dim_ordering()
     if border_mode not in {'valid', 'same', 'full'}:
@@ -41,6 +41,9 @@ class Convolution2DwithOwnRegularizer(Layer):
     self.bias = bias
     self.input_spec = [InputSpec(ndim=4)]
     self.initial_weights = weights
+
+    # for activity clipping
+    self.clip_val = clip_val
     super(Convolution2DwithOwnRegularizer, self).__init__(**kwargs)
 
 
@@ -105,6 +108,8 @@ class Convolution2DwithOwnRegularizer(Layer):
       else:
         raise ValueError('Invalid dim_ordering:', self.dim_ordering)
     output = self.activation(output)
+    if self.clip_val:
+      output = K.clip(output, self.clip_val[0], self.clip_val[1])
     return output
 
   def get_config(self):
@@ -121,7 +126,8 @@ class Convolution2DwithOwnRegularizer(Layer):
               'activity_regularizer': self.activity_regularizer.get_config() if self.activity_regularizer else None,
               'W_constraint': self.W_constraint.get_config() if self.W_constraint else None,
               'b_constraint': self.b_constraint.get_config() if self.b_constraint else None,
-              'bias': self.bias}
+              'bias': self.bias,
+              'clip_val': self.clip_val}
     base_config = super(Convolution2D, self).get_config()
     return dict(list(base_config.items()) + list(config.items()))
 
