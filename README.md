@@ -5,11 +5,15 @@ keras-information-dropout
 
 [Keras](https://keras.io/) implementation of the Information Dropout ([arXiv:1611.01353](https://arxiv.org/abs/1611.01353)) paper.
 
-![generated image](vae_information_dropout/images/generated_image.png)
+<img src="vae_information_dropout/images/generated_image.png" width="400px">
 
-![latent space interpolation](vae_information_dropout/images/latent.png)
+<img src="vae_information_dropout/images/latent.png" width="400px">
 
-![weight diagram](vae_information_dropout/images/weight_diagram.png)
+<img src="vae_information_dropout/images/weight_diagram.png" width="300px">
+
+<img src="all_cnn_96/images/datasample.png" width="300px">
+
+<img src="all_cnn_96/images/kldiv_heatmap.pdf" width="400px">
 
 ## Usage
 
