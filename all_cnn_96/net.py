@@ -39,21 +39,22 @@ def information_dropout_block(input_tensor, kernel_size, nb_filter, beta, block)
                       border_mode='same', name='block{}-conv2'.format(block), subsample=(2, 2))(x)
   f_x = BatchNormalization(axis=bn_axis, name='block{}-bn2'.format(block))(f_x)
   f_x = Activation('relu', name='block{}-relu2'.format(block))(f_x)
-  logalpha = Convolution2D(nb_filter, kernel_size[0], kernel_size[1],
-                           activity_regularizer=KLRegularizer(beta=beta),
-                           border_mode='same', subsample=(2, 2),
-                           clip_val=(np.log(0.0), np.log(0.5)), # clip 0 < alpha < 0.5 for stabilize learning
-                           name='block{}-logalpha'.format(block))(x)
+  alpha = Convolution2D(nb_filter, kernel_size[0], kernel_size[1],
+                        activity_regularizer=KLRegularizer(beta=beta),
+                        border_mode='same', subsample=(2, 2), activation='relu',
+                        clip_val=(0.0, 0.5), # clip 0 < alpha < 0.5 for stabilize learning
+                        name='block{}-alpha'.format(block))(x)
 
   def sampling(args):
-    f_x, logalpha = args
+    f_x, alpha = args
 
     epsilon = K.exp(K.random_normal(shape=K.shape(f_x), mean=0.,
-                                    std=K.exp(logalpha)))
-    return K.in_train_phase(f_x * epsilon, f_x)
+                                    std=alpha))
+    # return K.in_train_phase(f_x * epsilon, f_x)
+    return f_x * epsilon
 
   noise_x = Lambda(sampling, output_shape=lambda input_shapes: input_shapes[0],
-                   name='block{}-z'.format(block))([f_x, logalpha])
+                   name='block{}-z'.format(block))([f_x, alpha])
 
   return noise_x
 

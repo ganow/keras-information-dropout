@@ -12,9 +12,9 @@ class KLRegularizer(Regularizer):
   def __init__(self, beta=0.0):
     self.beta = K.cast_to_floatx(beta)
 
-  def __call__(self, logalpha):
+  def __call__(self, alpha):
     regularization = 0
-    regularization += - self.beta * K.mean(K.sum(logalpha, keepdims=0))
+    regularization += - self.beta * K.mean(K.sum(K.log(alpha), keepdims=0))
     return regularization
 
   def get_config(self):
